@@ -1,10 +1,11 @@
 import docker
+import sys
 
 client = docker.from_env()
 containers = []
 
 
-def cm(num, images=['alpine', 'ubuntu', 'busybox', 'debian']):
+def cm_start(num, images=['alpine', 'ubuntu', 'busybox', 'debian']):
     assert len(images) != 0
     for i in range(num):
         temp = client.containers.create(images[i % len(images)], "sh", tty=True)
@@ -38,7 +39,24 @@ def cm_save():
     file.close()
 
 
-def cm_stop():
+def cm_stop(keep=False, time=0):
     for container in containers:
-        container.stop(timeout=0)
-    client.containers.prune()
+        container.stop(timeout=time)
+    if not keep:
+        client.containers.prune()
+
+
+if __name__ == '__main__':
+    argc = len(sys.argv)
+    assert argc >= 2
+    match sys.argv[1]:
+        case "create":
+            print("A")
+        case "start":
+            print("A")
+        case "exec":
+            print("A")
+        case "stop":
+            print("A")
+        case "copy":
+            print("A")
