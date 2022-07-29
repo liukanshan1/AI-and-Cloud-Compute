@@ -2,9 +2,6 @@
 import docker
 import sys
 
-client = docker.from_env()
-containers = client.containers.list(True)
-
 
 def cm_create(num, images=['alpine', 'ubuntu', 'busybox', 'debian']):
     """
@@ -44,7 +41,7 @@ def cm_print_status():
     Print containers status.
     """
     for i in range(len(containers)):
-        print("Container", i, " status ", containers[i].status)
+        print("Container", i, containers[i].id, " status ", containers[i].status)
 
 
 def cm_exec(num, command):
@@ -74,17 +71,29 @@ def cm_save():
     file.close()
 
 
-def cm_stop(keep=False, time=0):
+def cm_stop(time=0):
     """
-    Stop containers and delete them if you want.
-    :param keep: True if you want to keep stopped containers.
+    Stop containers.
     :param time: Timeout in seconds to wait for the container to stop before sending a SIGKILL.
     """
     for container in containers:
         container.stop(timeout=time)
-    if not keep:
-        client.containers.prune()
+    cm_print_status()
     cm_save()
+
+
+def cm_delete():
+    """
+    Delete containers.
+    """
+    client.containers.prune()
+    cm_print_status()
+    cm_save()
+
+
+client = docker.from_env()
+containers = client.containers.list(True)
+cm_save()
 
 
 if __name__ == '__main__':
@@ -99,3 +108,7 @@ if __name__ == '__main__':
             cm_exec(int(sys.argv[2]), sys.argv[3])
         case "stop":
             cm_stop()
+        case "delete":
+            cm_delete()
+        case "list":
+            cm_print_status()
