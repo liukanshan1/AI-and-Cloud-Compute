@@ -1,6 +1,7 @@
 # Python Version 3.10
 import docker
 import sys
+import time
 
 
 def cm_create(num, images=['alpine', 'ubuntu', 'busybox', 'debian']):
@@ -40,8 +41,9 @@ def cm_print_status():
     """
     Print containers status.
     """
+    containers = client.containers.list(True)
     for i in range(len(containers)):
-        print("Container", i, containers[i].id, " status ", containers[i].status)
+        print("Container", i, containers[i].id, " status:", containers[i].status)
 
 
 def cm_exec(num, command):
@@ -56,7 +58,7 @@ def cm_exec(num, command):
         except docker.errors.APIError:
             print("The No.", i, " server returns an error.")
         else:
-            print(str(output,"utf-8"))
+            print(str(output, "utf-8"))
     cm_save()
 
 
@@ -64,6 +66,7 @@ def cm_save():
     """
     Save container status in a file.
     """
+    containers = client.containers.list(True)
     file = open("containers.txt", "w")
     for container in containers:
         file.write(container.id + " " + container.status + '\n')
@@ -105,9 +108,15 @@ if __name__ == '__main__':
         case "start":
             cm_start()
         case "exec":
-            cm_exec(int(sys.argv[2]), sys.argv[3])
+            if len(sys.argv) == 3:
+                cm_exec(len(containers), sys.argv[2])
+            elif len(sys.argv) == 4:
+                cm_exec(int(sys.argv[2]), sys.argv[3])
         case "stop":
-            cm_stop()
+            if len(sys.argv) == 2:
+                cm_stop()
+            elif len(sys.argv) == 3:
+                cm_stop(int(sys.argv[2]))
         case "delete":
             cm_delete()
         case "list":
