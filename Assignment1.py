@@ -4,7 +4,7 @@ import sys
 import time
 
 
-def cm_create(num, images=['alpine', 'ubuntu', 'busybox', 'debian']):
+def cm_create(num, images=['ubuntu']):
     """
     Create containers without starting them.
     :param num: The number of containers you want to create.
