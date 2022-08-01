@@ -1,25 +1,40 @@
 # Python Version 3.10
 import docker
 import sys
-import time
 
 
-def cm_create(num, images=['ubuntu']):
+def cm_create(num, images=['ubuntu'], volume=''):
     """
     Create containers without starting them.
+    :param volume: The volume you want to mount to the container.
     :param num: The number of containers you want to create.
     :param images: A list of images of containers.
     """
     assert len(images) != 0
+    if volume != '':
+        try:
+            volume = client.volumes.get(volume)
+            mp = docker.types.Mount("/home", volume)
+        except docker.errors.NotFound:
+            print("The volume does not exist.")
+            return
+        except docker.errors.APIError:
+            print("The server returns an error.")
+            return
     for i in range(num):
         try:
-            temp = client.containers.create(images[i % len(images)], "sh", tty=True)
+            if volume != '':
+                temp = client.containers.create(images[i % len(images)], "sh", tty=True, mounts=[mp], name=str(i))
+            else:
+                temp = client.containers.create(images[i % len(images)], "sh", tty=True)
         except docker.errors.ImageNotFound:
             print("The specified image does not exist.")
             cm_stop()
+            return
         except docker.errors.APIError:
             print("The server returns an error.")
             cm_stop()
+            return
         else:
             containers.append(temp)
             print("Container created .. " + temp.id)
@@ -94,17 +109,36 @@ def cm_delete():
     cm_save()
 
 
+def cm_create_volume(name):
+    """
+    Create a volume and return.
+    :param name: Name of the volume.
+    """
+    try:
+        volume = client.volumes.create(name=name, driver='local',
+                                       driver_opts={'foo': 'bar', 'baz': 'false'},
+                                       labels={"key": "value"})
+    except docker.errors.APIError:
+        print("The server returns an error.")
+        return
+    return volume
+
+
 client = docker.from_env()
 containers = client.containers.list(True)
 cm_save()
-
 
 if __name__ == '__main__':
     argc = len(sys.argv)
     assert argc >= 2
     match sys.argv[1]:
         case "create":
-            cm_create(int(sys.argv[2]))
+            if len(sys.argv) == 3:
+                cm_create(int(sys.argv[2]))
+            elif len(sys.argv) == 4:
+                cm_create(int(sys.argv[2]), list(sys.argv[3]))
+            elif len(sys.argv) == 5:
+                cm_create(int(sys.argv[2]), list(sys.argv[3]), sys.argv[4])
         case "start":
             cm_start()
         case "exec":
@@ -121,3 +155,5 @@ if __name__ == '__main__':
             cm_delete()
         case "list":
             cm_print_status()
+        case "createVolume":
+            cm_create_volume(sys.argv[2])
