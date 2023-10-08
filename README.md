@@ -1,6 +1,7 @@
 # AI-and-Cloud-Compute
 ### 麦吉尔大学暑期PBL交流课程人工智能与云计算Project
 
+'''
 >>> python3 cm.py create 3
 This command will create three docker containers with Ubuntu operating system.
 >>> python3 cm.py create 3 centos
@@ -18,3 +19,4 @@ This command will wait three seconds and stop all docker containers.
 >>> python3 cm.py list
 This command will list all docker containers.
 The cluster manager is able to create any number docker containers and start executing some commands in these docker containers.
+'''
