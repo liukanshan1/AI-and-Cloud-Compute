@@ -1,7 +1,7 @@
 # AI-and-Cloud-Compute
 ### 麦吉尔大学暑期PBL交流课程人工智能与云计算Project
 
-
+#### 使用方法
 ```python
 >>> python3 cm.py create 3
 This command will create three docker containers with Ubuntu operating system.
